@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "target": "ES5",
+    "jsx": "react",
+    "baseUrl": ".",
+    "experimentalDecorators": true,
+    "paths": {
+      "@/components/*": ["components/*"],
+      "@/page-components/*": ["page-components/*"],
+      "@/lib/*": ["lib/*"],
+      "@/helpers/*": ["helpers/*"],
+      "@/stores/*": ["stores/*"],
+      "@/server/*": ["server/*"],
+      "@/assets/*": ["assets/*"]
+    }
+  }
+}

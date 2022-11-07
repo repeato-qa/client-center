@@ -1,0 +1,14 @@
+:root {
+  --main-color: #85e8ff;
+  --background-color: #fff;
+  --hover-color: rgb(133 232 255 / 60%);
+}
+.center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+}
+
+button.MuiButton-outlinedSizeMedium {
+  height: 56px;
+}
