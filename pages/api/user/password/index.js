@@ -1,5 +1,5 @@
 import { ValidateProps } from 'server/constants';
-import { updateUserPasswordByOldPassword } from 'server/db';
+import { updateUserPasswordByEmail } from 'server/db';
 import { auths, validateBody } from 'server/middlewares';
 import { getMongoDb } from 'server/mongodb';
 import { ncOpts } from 'server/nc';
@@ -12,32 +12,22 @@ handler.put(
   validateBody({
     type: 'object',
     properties: {
-      oldPassword: ValidateProps.user.password,
-      newPassword: ValidateProps.user.password,
+      password: ValidateProps.user.password,
+      email: ValidateProps.user.email,
     },
-    required: ['oldPassword', 'newPassword'],
+    required: ['password', 'email'],
     additionalProperties: false,
   }),
   async (req, res) => {
-    if (!req.user) {
-      res.json(401).end();
-      return;
-    }
-
     const db = await getMongoDb();
 
-    const { oldPassword, newPassword } = req.body;
+    const { email, password } = req.body;
 
-    const success = await updateUserPasswordByOldPassword(
-      db,
-      req.user._id,
-      oldPassword,
-      newPassword
-    );
+    const success = await updateUserPasswordByEmail(db, email, password);
 
     if (!success) {
       res.status(401).json({
-        error: { message: 'The old password you entered is incorrect.' },
+        error: { message: 'Unable to update user password.' },
       });
       return;
     }

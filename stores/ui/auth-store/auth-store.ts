@@ -1,9 +1,9 @@
 import { action, computed, makeObservable, observable } from 'mobx';
-import { getEnv, getRoot } from '../../../helpers/mobx-easy-wrapper';
+import { getEnv, getRoot } from '@/helpers/mobx-easy-wrapper';
 import User from '../../data/models/user';
+import { throwIf } from '@/helpers/generic';
+import { ResetPassword } from '../../../types/auth';
 // import { StorageItems } from '../../../lib/core/storage-service';
-import { throwIf } from '../../../helpers/generic';
-import { EmailConfirm, ResetPassword } from '../../../types/auth';
 
 export enum AuthState {
   Authenticating = 'authenticating', // eslint-disable-line no-unused-vars
@@ -148,19 +148,6 @@ class AuthStore {
     }
   };
 
-  confirmEmail = async (args: EmailConfirm) => {
-    try {
-      if (!args.token || !args.tokenId || !args.email)
-        throw new Error('invalid');
-      const result = await getEnv().apiFactory.authService.emailConfirm(args);
-
-      return result;
-    } catch (e: any) {
-      console.log(e, 'Failed to confirm email');
-      throw e;
-    }
-  };
-
   forgotPassword = async (email: string) => {
     try {
       const result = await getEnv().apiFactory.authService.forgotPassword(
@@ -178,13 +165,11 @@ class AuthStore {
     }
   };
 
-  setPassword = async (/* args: ResetPassword*/) => {
+  setPassword = async (args: ResetPassword) => {
     try {
-      // if (!args.email || !args.password) throw new Error('invalid');
-      // const result = await getEnv().apiFactory.authService.forgotPassword(
-      //   args.email
-      // );
-      // return result;
+      if (!args.email || !args.password) throw new Error('invalid');
+      const result = await getEnv().apiFactory.authService.setPassword(args);
+      return result;
     } catch (e: any) {
       console.log(e, 'Failed to set password');
       throw e;
@@ -281,9 +266,9 @@ class AuthStore {
     }
   };
 
-  resendInvite = async (email: string) => {
+  verifyEmail = async (email: string) => {
     try {
-      const result = await getEnv().apiFactory.authService.resendInvite(email);
+      const result = await getEnv().apiFactory.authService.verifyEmail(email);
 
       return result;
     } catch (e) {

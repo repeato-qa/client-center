@@ -1,14 +1,15 @@
 import React from 'react';
-import { useHistory } from 'react-router-dom';
+import { useRouter } from 'next/router';
 import { Avatar, Box, Button, TextField, Typography } from '@mui/material';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import { useStore } from '@/lib/use-store';
+import { parseGetErrMsg } from '@/helpers/generic';
 
 const SetPassword = () => {
   const {
     uiStore: { authStore },
   } = useStore();
-  const navigate = useHistory();
+  const router = useRouter();
 
   // local states
   const [formSubmit, setFormSubmit] = React.useState(false);
@@ -38,19 +39,19 @@ const SetPassword = () => {
 
     setFormSubmit(true);
 
-    // authStore
-    //   .setPassword({ email: authStore.confirmedEmail, password } as any)
-    //   .then(() => navigate.push('/login'))
-    //   .catch((err: Error) => {
-    //     setFormSubmit(false);
-    //     setErrors({ password: err.message });
-    //   });
+    authStore
+      .setPassword({ email: authStore.confirmedEmail, password } as any)
+      .then(() => router.push('/login'))
+      .catch((err: Error) => {
+        setFormSubmit(false);
+        setErrors({ password: parseGetErrMsg(err) });
+      });
   };
 
   // Side effects
   React.useEffect(() => {
-    if (!authStore.confirmedEmail) navigate.push('/login');
-  }, []);
+    if (!authStore.confirmedEmail) router.push('/login');
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <Box

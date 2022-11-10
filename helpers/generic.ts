@@ -84,4 +84,6 @@ export const decrypt = (encoded: string) => {
 };
 
 export const parseGetErrMsg = (err: Error | AxiosError) =>
-  axios.isAxiosError(err) ? err?.response?.data?.error?.message : err?.message;
+  axios.isAxiosError(err)
+    ? err?.response?.data?.error?.message || err?.response?.data?.message
+    : err?.message;

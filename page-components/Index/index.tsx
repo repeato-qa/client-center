@@ -318,12 +318,6 @@ const Members = ({
     if (!invite || !/\S+@\S+\.\S+/.test(invite)) return;
     const companyDomain = (email: string) => email.split('@')[1];
 
-    console.log(
-      'comapnyDomain',
-      companyDomain(invite),
-      companyDomain(authStore?.user.email || '')
-    );
-
     if (companyDomain(invite) !== companyDomain(authStore.user?.email || '')) {
       setAlert(
         'Sorry, you can only invite team members of the same company. Please use different email or contact support',
@@ -382,7 +376,7 @@ const Members = ({
 
   const handleResendInvite = (email: string) => {
     authStore
-      .resendInvite(email)
+      .verifyEmail(email)
       .then(() => setAlert(`Member ${email} re-invited successfully.`))
       .catch(() => setAlert('User already confirmed.', 'error'));
   };

@@ -28,7 +28,7 @@ handler.post(
 
     const email = normalizeEmail(req.body.email);
     const user = await findUserByEmail(db, email);
-    console.log('user', user);
+
     if (!user) {
       res.status(400).json({
         error: { message: 'We couldn’t find that email. Please try again.' },

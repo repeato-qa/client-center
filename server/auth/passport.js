@@ -22,8 +22,20 @@ passport.use(
     async (req, email, password, done) => {
       const db = await getMongoDb();
       const user = await findUserWithEmailAndPassword(db, email, password);
-      if (user) done(null, user);
-      else done(null, false, { message: 'Email or password is incorrect' });
+      const status = 401; // needed for un-authenticated response
+
+      if (!user)
+        return done(
+          { message: 'Email or password is incorrect.', status },
+          false
+        );
+      if (!user.verified) {
+        return done(
+          { message: 'Your account is not verified.', status },
+          false
+        );
+      }
+      return done(null, user);
     }
   )
 );

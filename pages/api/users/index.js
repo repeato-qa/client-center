@@ -1,6 +1,15 @@
 import { nanoid } from 'nanoid';
+import { ObjectId } from 'mongodb';
 import { ValidateProps } from 'server/constants';
-import { findUserByEmail, insertUser, acContact } from 'server/db';
+import {
+  findUserByEmail,
+  insertUser,
+  acContact,
+  findUserByKey,
+  updateUserById,
+  findAndDeleteTokenByIdAndType,
+  verifyUser,
+} from 'server/db';
 import { auths, validateBody } from 'server/middlewares';
 import { getMongoDb } from 'server/mongodb';
 import { ncOpts } from 'server/nc';
@@ -24,7 +33,14 @@ handler.post(
   async (req, res) => {
     const db = await getMongoDb();
 
-    let { optNewsLetter, company = '', firstName, email, password } = req.body;
+    let {
+      optNewsLetter,
+      company = '',
+      firstName,
+      email,
+      password,
+      invitedBy,
+    } = req.body;
 
     email = normalizeEmail(req.body.email);
     if (!isEmail(email)) {
@@ -34,7 +50,7 @@ handler.post(
       return;
     }
 
-    if (await findUserByEmail(db, email)) {
+    if (!invitedBy && (await findUserByEmail(db, email))) {
       res
         .status(403)
         .json({ error: { message: 'The email has already been used.' } });
@@ -43,7 +59,7 @@ handler.post(
 
     const acData = await acContact(req.body); // create or update acContact before inserting in DB
 
-    const user = await insertUser(db, {
+    const userData = {
       id: nanoid(),
       email,
       originalPassword: password,
@@ -55,9 +71,38 @@ handler.post(
       acId: acData?.contact?.id,
       acStatus: acData?.response?.data?.error?.message || '200 OK',
       lastName: '',
-    });
+    };
 
-    res.status(201).json({ user });
+    let user = null;
+    if (!invitedBy) {
+      user = await insertUser(db, userData);
+      await verifyUser(db, user);
+    } else {
+      const deletedToken = await findAndDeleteTokenByIdAndType(
+        db,
+        invitedBy,
+        'invitedBy'
+      );
+
+      if (!deletedToken) {
+        res
+          .status(403)
+          .json({ error: { message: 'Invalid or expired invite link.' } });
+        return;
+      }
+
+      const invitedUser = await findUserByKey(
+        db,
+        'invitedBy',
+        new ObjectId(deletedToken.creatorId)
+      );
+      userData.verified = true;
+      userData.invite = 'confirmed';
+      user = await updateUserById(db, invitedUser._id, userData);
+      req.logIn(user, console.log);
+    }
+
+    res.status(201).json(user);
     // can be used for auto login - if user already verified
     // req.logIn(user, (err) => {
     //   if (err) throw err;

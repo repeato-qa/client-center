@@ -2,7 +2,6 @@ import React from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useStore } from '@/lib/use-store';
-// import { useCurrentUser } from '@/lib/user';
 import {
   Box,
   Avatar,
@@ -14,7 +13,7 @@ import {
   Button,
 } from '@mui/material';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
-import { validate } from 'helpers/generic';
+import { parseGetErrMsg, validate } from 'helpers/generic';
 import './Auth.module.css';
 
 const Login = () => {
@@ -28,7 +27,7 @@ const Login = () => {
   }) as any;
   const [errors, setErrors] = React.useState<any>({ email: '', password: '' });
   const [formSubmit, setFormSubmit] = React.useState(false);
-  const [resendEmail, setResendEmail] = React.useState(false);
+  const [resendEmail, setResendEmail] = React.useState('');
 
   const validateField = (name: string, value: any) => {
     const error = validate(value, rules[name]);
@@ -63,16 +62,21 @@ const Login = () => {
       .then(() => router.push('/'))
       .catch((err: Error) => {
         setFormSubmit(false);
-        setResendEmail(err.message.includes('not verified'));
-        setErrors({ ...errors, email: 'Incorrect email or password.' });
+        setResendEmail(
+          parseGetErrMsg(err)?.includes('not verified') ? loginData.email : ''
+        );
+        setErrors({ ...errors, email: parseGetErrMsg(err) });
       });
   };
 
   const handleReSend = () => {
     authStore
-      .resendInvite(loginData.email)
-      .then(() => setAlert('Confirmation email sent again successfully.'));
-    setResendEmail(false);
+      .verifyEmail(resendEmail)
+      .then(() => setAlert('Confirmation email sent again successfully.'))
+      .catch((err: Error) =>
+        setErrors({ ...errors, email: parseGetErrMsg(err) })
+      );
+    setResendEmail('');
   };
 
   return (

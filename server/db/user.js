@@ -6,6 +6,7 @@ import HttpService from '@/lib/core/http-service';
 import normalizeEmail from 'validator/lib/normalizeEmail';
 import { AC } from 'server/constants';
 import { templates, sendMail } from 'server/mail';
+import { createToken } from '.';
 
 const httpService = new HttpService({
   baseURL: 'https://repeato-qa.api-us1.com/api/3',
@@ -44,7 +45,18 @@ export async function findUserByEmail(db, email) {
     .then((user) => user || null);
 }
 
+export async function findUserByKey(db, key, value) {
+  return db
+    .collection('Users')
+    .findOne({ [key]: value }, { projection: dbProjectionUsers() })
+    .then((user) => user || null);
+}
+
 export async function updateUserById(db, id, data) {
+  if (data.originalPassword) {
+    data.password = await bcrypt.hash(data.originalPassword, 10);
+    delete data.originalPassword; // remove the original password from params as we are inserting encrypting password
+  }
   return db
     .collection('Users')
     .findOneAndUpdate(
@@ -82,6 +94,16 @@ export async function updateUserPasswordByOldPassword(
   return true;
 }
 
+export async function updateUserPasswordByEmail(db, email, newPassword) {
+  const user = await findUserByEmail(db, email);
+  if (!user) return false;
+  const password = await bcrypt.hash(newPassword, 10);
+  await db
+    .collection('Users')
+    .updateOne({ _id: user._id }, { $set: { password } });
+  return true;
+}
+
 export async function UNSAFE_updateUserPassword(db, id, newPassword) {
   const password = await bcrypt.hash(newPassword, 10);
   await db
@@ -93,7 +115,7 @@ export function dbProjectionUsers(prefix = '') {
   return {
     [`${prefix}password`]: 0,
     [`${prefix}email`]: 0,
-    [`${prefix}emailVerified`]: 0,
+    [`${prefix}verified`]: 0,
   };
 }
 
@@ -235,7 +257,13 @@ export async function inviteUser(db, email, sender) {
       );
     response = user; // status => pending
   } else {
-    const signUpLink = `${process.env.WEB_URI}/sign-up?email=${email}&company=${sender.company}&invited=true`;
+    const encodedEmail = encodeURIComponent(email);
+    const token = await createToken(db, {
+      creatorId: sender._id,
+      type: 'invitedBy',
+      expireAt: new Date(Date.now() + 1000 * 60 * 20),
+    });
+    const signUpLink = `${process.env.WEB_URI}/sign-up?email=${encodedEmail}&company=${sender.company}&invitedBy=${token._id}`;
     const data = {
       email,
       firstName: '',
@@ -263,9 +291,33 @@ export async function inviteUser(db, email, sender) {
 
     await db
       .collection('Users')
-      .updateOne({ id: sender.id }, { $push: { managedUsers: email } });
+      .updateOne(
+        { _id: new ObjectId(sender._id) },
+        { $push: { managedUsers: email } }
+      );
     response = data; // status => pending
   }
 
   return response;
+}
+
+export async function verifyUser(db, user) {
+  const token = await createToken(db, {
+    creatorId: user._id,
+    type: 'emailVerify',
+    expireAt: new Date(Date.now() + 1000 * 60 * 60 * 24),
+  });
+
+  const replacements = {
+    '{{confirmLink}}': `${process.env.WEB_URI}/verify-email/${token._id}`,
+  };
+  const html = templates('confirmEmail', replacements);
+
+  await sendMail({
+    to: user.email,
+    subject: 'Email Confirmation',
+    html,
+  });
+
+  return true;
 }

@@ -1,4 +1,4 @@
-import { EmailConfirm, ResetPassword } from '../../types/auth';
+import { ResetPassword } from '../../types/auth';
 import BaseService from '../core/base-service';
 import StorageService, { StorageItems } from '../core/storage-service';
 // import { config, crypt } from '../../helpers/generic';
@@ -55,27 +55,6 @@ export default class AuthService extends BaseService {
     return response;
   }
 
-  async emailConfirm(args: EmailConfirm) {
-    // const { token, tokenId, email } = args;
-    // const response = await app.emailPasswordAuth.confirmUser({
-    //   token,
-    //   tokenId,
-    // });
-    // const updated = await this.httpService.updateOneAnon(
-    //   this.dbCollection,
-    //   { email },
-    //   { $set: { id: tokenId, verified: true } }
-    // );
-    // await this.httpService.updateOneAnon(
-    //   this.dbCollection,
-    //   { email, invite: 'pending' },
-    //   { $set: { invite: 'confirmed' } }
-    // );
-
-    console.log('[Auth][EmailConfirm]ToBeImplemented', args);
-    return true;
-  }
-
   async forgotPassword(email: string) {
     await this.httpService.post('/user/password/reset', { email });
 
@@ -90,6 +69,13 @@ export default class AuthService extends BaseService {
     });
 
     console.log('[Auth][ResetPassword]', args.token);
+    return true;
+  }
+
+  async setPassword({ email, password }: ResetPassword) {
+    await this.httpService.put('/user/password', { password, email });
+
+    console.log('[Auth][SetPassword]', email);
     return true;
   }
 
@@ -148,9 +134,9 @@ export default class AuthService extends BaseService {
     return response;
   }
 
-  async resendInvite(email: string) {
-    console.log('[Resend]ToBeImplemented', email);
-    // await app.emailPasswordAuth.retryCustomConfirmation({ email });
+  async verifyEmail(email: string) {
+    await this.httpService.post('/user/email/verify', { email });
+
     return true;
   }
 

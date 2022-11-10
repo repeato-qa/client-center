@@ -20,6 +20,7 @@ const defaultSignUpValues = {
   email: '',
   password: '',
   company: '',
+  invitedBy: undefined,
 };
 
 const SignUp = () => {
@@ -75,11 +76,17 @@ const SignUp = () => {
     }
 
     signUpData.optNewsLetter = optNewsLetter;
+    signUpData.invitedBy = router.query.invitedBy || undefined;
 
     authStore
       .register(signUpData)
       .then(() => {
-        setAlert('Please check your inbox for email confirmation.');
+        if (!isInvited)
+          setAlert('Please check your inbox for email confirmation.');
+        else {
+          setAlert('Signup completed - Logging you in...');
+          router.push('/');
+        }
         setSignUpData({ ...defaultSignUpValues });
       })
       .catch((err: Error) => {
@@ -89,14 +96,14 @@ const SignUp = () => {
   };
 
   const isInvited = () => {
-    const { invited } = router.query;
-    return invited === 'true';
+    const { invitedBy } = router.query;
+    return !!invitedBy;
   };
 
   React.useEffect(() => {
     const { email = '', company = '' } = router.query;
     if (email) setSignUpData({ ...signUpData, email, company });
-  }, []);
+  }, [router.query]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <Box

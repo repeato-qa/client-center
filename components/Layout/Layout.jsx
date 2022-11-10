@@ -22,15 +22,16 @@ const Layout = ({ children }) => {
     const publicPaths = [
       '/login',
       '/sign-up',
-      '/forget-password',
       '/reset-password',
       '/confirm-email',
+      '/set-password',
     ];
+    const publicPartialMatch = ['/verify-email', '/forget-password'];
     const path = url.split('?')[0];
     if (
       !authStore.isLoggedIn &&
       !publicPaths.includes(path) &&
-      !path.startsWith('/forget-password')
+      !publicPartialMatch.some((match) => path.startsWith(match))
     ) {
       setAuthorized(false);
       router.push({
