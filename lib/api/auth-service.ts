@@ -20,7 +20,7 @@ export default class AuthService extends BaseService {
   }
 
   async getLoggedInUser() {
-    const user = this.httpService.get('/user');
+    const user = await this.httpService.get('/user');
 
     return user;
   }

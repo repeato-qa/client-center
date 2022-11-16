@@ -17,7 +17,7 @@ const getSession = nextSession({
     secure: process.env.NODE_ENV === 'production',
     maxAge: 2 * 7 * 24 * 60 * 60, // 2 weeks,
     path: '/',
-    sameSite: 'strict',
+    sameSite: 'none',
   },
   touchAfter: 1 * 7 * 24 * 60 * 60, // 1 week
 });
