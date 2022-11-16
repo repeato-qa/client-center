@@ -114,7 +114,6 @@ export async function UNSAFE_updateUserPassword(db, id, newPassword) {
 export function dbProjectionUsers(prefix = '') {
   return {
     [`${prefix}password`]: 0,
-    [`${prefix}email`]: 0,
     [`${prefix}verified`]: 0,
   };
 }
