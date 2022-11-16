@@ -2,7 +2,7 @@ import { memberOfTeams } from '.';
 
 export async function verifyLicense(db, key, ignoreUserId) {
   const license = await db.collection('Licences').findOne({ key });
-  if (!license) throw new Error('License key is not valid.');
+  if (!license) throw new Error('Invalid license.');
 
   const isLinkedToUser = await db.collection('Users').findOne({ license: key });
   if (!ignoreUserId?.equals(isLinkedToUser?._id))

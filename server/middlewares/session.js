@@ -9,15 +9,16 @@ const mongoStore = MongoStore.create({
   collectionName: 'Sessions',
   stringify: false,
 });
+const isProd = process.env.NODE_ENV === 'production';
 
 const getSession = nextSession({
   store: promisifyStore(mongoStore),
   cookie: {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
+    secure: isProd,
     maxAge: 2 * 7 * 24 * 60 * 60, // 2 weeks,
     path: '/',
-    sameSite: 'none',
+    sameSite: isProd ? 'none' : 'strict',
   },
   touchAfter: 1 * 7 * 24 * 60 * 60, // 1 week
 });

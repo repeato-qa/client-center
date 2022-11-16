@@ -32,6 +32,7 @@ import RootStore from '../../stores/root-store';
 import { Remove } from '@mui/icons-material';
 import User from '../../stores/data/models/user';
 import styles from './Home.module.css';
+import { parseGetErrMsg } from 'helpers/generic';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -140,7 +141,7 @@ const Details = ({ rootStore }: { rootStore: RootStore }) => {
         setAlert('License verified successfully!');
         authStore.setUser(response?.user as any);
       })
-      .catch((e) => setAlert(e.message, 'error'))
+      .catch((e) => setAlert(parseGetErrMsg(e), 'error'))
       .finally(() => setFormSubmit(false));
   };
 

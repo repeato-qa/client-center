@@ -25,7 +25,7 @@ handler.patch(
     try {
       await verifyLicense(db, key, req.user._id);
     } catch (error) {
-      res.status(401).json({ error: { message: error.message } });
+      res.status(404).json({ error: { message: error.message } });
       return;
     }
 

@@ -81,7 +81,7 @@ const SignUp = () => {
     authStore
       .register(signUpData)
       .then(() => {
-        if (!isInvited)
+        if (!isInvited())
           setAlert('Please check your inbox for email confirmation.');
         else {
           setAlert('Signup completed - Logging you in...');

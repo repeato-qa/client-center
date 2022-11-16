@@ -40,7 +40,7 @@ export const VerifyEmail = ({ valid /*, user */ }) => {
       <Typography component="h1" variant="h5">
         Email Confirmation
       </Typography>
-      <Box component="form" sx={{ mt: 3 }}>
+      <Box component="form" sx={{ mt: 3, textAlign: 'center' }}>
         {!emailConfirmed && (
           <Typography>
             Invalid token or link is expired. Redirecting...
