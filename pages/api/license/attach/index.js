@@ -30,7 +30,7 @@ handler.patch(
     }
 
     await db
-      .collection('Licences')
+      .collection('Users')
       .updateOne(
         { _id: new ObjectId(req.user._id) },
         { $set: { license: key } }

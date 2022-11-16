@@ -5,7 +5,7 @@ export async function verifyLicense(db, key, ignoreUserId) {
   if (!license) throw new Error('Invalid license.');
 
   const isLinkedToUser = await db.collection('Users').findOne({ license: key });
-  if (!ignoreUserId?.equals(isLinkedToUser?._id))
+  if (isLinkedToUser && !ignoreUserId?.equals(isLinkedToUser?._id))
     throw new Error('License is already linked to another user.');
 
   return license;
