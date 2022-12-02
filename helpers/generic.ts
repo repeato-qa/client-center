@@ -1,4 +1,5 @@
 import axios, { AxiosError } from 'axios';
+import normalizeEmail from 'validator/lib/normalizeEmail';
 import { Environment } from './create-store';
 
 const salt = 'RepeatoRccSalt';
@@ -87,3 +88,9 @@ export const parseGetErrMsg = (err: Error | AxiosError) =>
   axios.isAxiosError(err)
     ? err?.response?.data?.error?.message || err?.response?.data?.message
     : err?.message;
+
+export const normalizeEmailUtil = (email: string) =>
+  normalizeEmail(email, {
+    gmail_remove_dots: false,
+    gmail_remove_subaddress: false,
+  });

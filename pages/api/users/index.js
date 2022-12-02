@@ -15,7 +15,7 @@ import { getMongoDb } from 'server/mongodb';
 import { ncOpts } from 'server/nc';
 import nc from 'next-connect';
 import isEmail from 'validator/lib/isEmail';
-import normalizeEmail from 'validator/lib/normalizeEmail';
+import { normalizeEmailUtil } from '@/helpers/generic';
 
 const handler = nc(ncOpts);
 
@@ -42,7 +42,7 @@ handler.post(
       invitedBy,
     } = req.body;
 
-    email = normalizeEmail(req.body.email);
+    email = normalizeEmailUtil(req.body.email);
     if (!isEmail(email)) {
       res
         .status(400)

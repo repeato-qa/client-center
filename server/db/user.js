@@ -3,7 +3,7 @@ import { ObjectId } from 'mongodb';
 import freeEmailDomains from 'free-email-domains';
 import { nanoid } from 'nanoid';
 import HttpService from '@/lib/core/http-service';
-import normalizeEmail from 'validator/lib/normalizeEmail';
+import { normalizeEmailUtil } from '@/helpers/generic';
 import { AC } from 'server/constants';
 import { templates, sendMail } from 'server/mail';
 import { createToken } from '.';
@@ -14,7 +14,7 @@ const httpService = new HttpService({
 httpService.setApiToken(process.env.AC_API_TOKEN);
 
 export async function findUserWithEmailAndPassword(db, email, password) {
-  email = normalizeEmail(email);
+  email = normalizeEmailUtil(email);
   const user = await db.collection('Users').findOne({ email });
 
   if (user && (await bcrypt.compare(password, user.password))) {
@@ -38,7 +38,7 @@ export async function findUserById(db, userId) {
 }
 
 export async function findUserByEmail(db, email) {
-  email = normalizeEmail(email); // normalize
+  email = normalizeEmailUtil(email); // normalize
   return db
     .collection('Users')
     .findOne({ email }, { projection: dbProjectionUsers() })

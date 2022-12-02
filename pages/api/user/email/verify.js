@@ -3,7 +3,7 @@ import { auths } from 'server/middlewares';
 import { getMongoDb } from 'server/mongodb';
 import { ncOpts } from 'server/nc';
 import nc from 'next-connect';
-import normalizeEmail from 'validator/lib/normalizeEmail';
+import { normalizeEmailUtil } from '@/helpers/generic';
 
 const handler = nc(ncOpts);
 
@@ -11,7 +11,7 @@ handler.use(...auths);
 
 handler.post(async (req, res) => {
   const db = await getMongoDb();
-  const email = normalizeEmail(req.body.email);
+  const email = normalizeEmailUtil(req.body.email);
 
   const user = await findUserByEmail(db, email);
 
