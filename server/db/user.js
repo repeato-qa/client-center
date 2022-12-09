@@ -161,7 +161,7 @@ export const acContact = async (data) => {
   const contacts = getContacts.contacts; // filtered contacts
 
   // update contact if exist OR create if not found
-  if (contacts.length) {
+  if (contacts?.length) {
     response = await httpService.put(`/contacts/${contacts[0].id}`, body);
     contactId = contacts[0].id;
   } else {
@@ -179,14 +179,14 @@ export const acContact = async (data) => {
       );
       const companyContacts = getCompanyContacts.contacts; // filtered contacts
 
-      if (companyContacts.length) {
+      if (companyContacts?.length) {
         const tagContactsIds = [
           contactId,
           ...companyContacts.map((contact) => contact.id),
         ];
 
         const tagPromises = [];
-        tagContactsIds.length &&
+        tagContactsIds?.length &&
           tagContactsIds.forEach((id) => {
             const tagBody = { contactTag: { contact: `${id}`, tag: '3' } }; // tag 3 is for team
 
